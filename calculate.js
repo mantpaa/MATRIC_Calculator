@@ -1,18 +1,131 @@
-// creating stacks; one for values, one for operators
-var operatorStack = new Array();
-var numberStack = new Array();
-
-
+// creating stack. Holds the postfix (RPN) version of equation
+// equation is used for debugging purposes
+var tokenStack = new Array();
+var equation = "";
 // Defines the operatorToken class
-function operatorToken(tk, type)
-{
-    this.token= tk;
-    this.ifbinary = type;
+function operatorToken(tokenIn, type) {
+  this.token = tokenIn;
+    this.arguments = type;
 }
 
+// Store various test equations as functions so we can quickly retest if we've changed something.
+function test1() {
+    tokenStack = new Array();
+    console.log("Test1: 5 + 8 * sin(2*15)");
+    console.log("postfix: 5 8 2 15 * sin * +");
+    tokenStack.push(5);
+    tokenStack.push(8);
+    tokenStack.push(2);
+    tokenStack.push(15);
+    tokenStack.push(new operatorToken("*", "binary"));
+    tokenStack.push(new operatorToken("sin", "unary"));
+    tokenStack.push(new operatorToken("*", "binary"));
+    tokenStack.push(new operatorToken("+", "binary"));
+}
 
+function test2() {
+    tokenStack = new Array();
+    console.log("Test2: 17^(2) + (4/3) + 2 * 4");
+    console.log("postfix: 17 2 ^ 4 3 / + 2 4 * +");
+    tokenStack.push(17);
+    tokenStack.push(2);
+    tokenStack.push(new operatorToken("^", "binary"));
+    tokenStack.push(4);
+    tokenStack.push(3);
+    tokenStack.push(new operatorToken("/", "binary"));
+    tokenStack.push(new operatorToken("+", "binary"));
+    tokenStack.push(2);
+    tokenStack.push(4);
+    tokenStack.push(new operatorToken("*", "binary"));
+    tokenStack.push(new operatorToken("+", "binary"));
+}
+
+function test3()
+{
+    tokenStack = new Array();
+    console.log("Test2: -2*3");
+    console.log("postfix: 2 3 * -");
+    tokenStack.push(2);
+    tokenStack.push(3);
+    tokenStack.push(new operatorToken("*", "binary"));
+    tokenStack.push(new operatorToken("-", "sign"));
+}
+
+// store equate logic as a seperate function
+function equate(token, num1, num2)
+{
+    sum = 0;
+    tk = token;
+    switch (tk) {
+    case '+':
+        sum += num1 + num2;
+        console.log("+ result: ", sum);
+        break;
+    case '-':
+        sum += num1 - num2;
+        console.log("- result: ", sum);
+        break;
+    case '*':
+        sum += num1 * num2;
+        console.log("* result: ", sum);
+        break;
+    case '/':
+        sum += num1 / num2;
+        console.log("/ result: ", sum);
+        break;
+
+    case '^':
+        sum += num1 * num1;
+        console.log("/ result: ", sum);
+        break;
+    case 'sin':
+        sum += Math.sin(num1 * Math.PI / 180.0);
+        console.log("+ result: ", sum);
+        break;
+    case 'cos':
+        sum += Math.cos(num1);
+        console.log("+ result: ", sum);
+        break;
+    case 'tan':
+        sum += Math.tan(num1);
+        console.log("+ result: ", sum);
+        break;
+
+    case 'arcsin':
+        sum += Math.asin(num1);
+        console.log("+ result: ", sum);
+        break;
+    case 'arccos':
+        sum += Math.acos(num1);
+        console.log("+ result: ", sum);
+        break;
+    case 'arctan':
+        sum += Math.atan(num1);
+        console.log("+ result: ", sum);
+        break;
+
+    case 'abs':
+        sum += Math.abs(num1);
+        console.log("+ result: ", sum);
+        break;
+    case 'sqrt':
+        sum += Math.sqrt(num1);
+        console.log("+ result: ", sum);
+        break;
+    case 'log':
+        sum += Math.log(num1);
+        console.log("+ result: ", sum);
+        break;
+    }
+    return sum;
+}
+// debug object
+// TODO: implement this
+function debug_manager(global_logging, function_logging, print_value) {
+    print("hello");
+}
 // Start: Pushing values to stacks
-    // Operators
+/*    // Operators
 console.log("Pushing operators to operatorStack...")
 operatorStack.push(new operatorToken("+", true));
 operatorStack.push(new operatorToken("*", true));
@@ -26,7 +139,7 @@ numberStack.push(8);
 numberStack.push(2);
 numberStack.push(15);
 console.log("Numbers pushed");
-// End: Pushing values to stacks
+*/ // End: Pushing values to stacks
 
 
 /*
@@ -52,75 +165,46 @@ round(x)	Rounds x to the nearest integer
 */
 
 // calculation loop
-var counter = 1;
-while (operatorStack !== undefined && operatorStack.length != 0) {
-    // pop from operator stack
-    token = operatorStack.pop();
-    op = token.token;
-    sum = 0;
-    
-    if (token.ifbinary) {
-        num2 = numberStack.pop();
-        num = numberStack.pop();
-        // Binary operators
-        switch(op)
+test3();
+sum = 0;
+numStack = new Array();
+for(var i = 0; i < tokenStack.length; i++)
+    {
+        inputToken = tokenStack[i];
+        if(isNaN(inputToken))
             {
-                case '+': sum += num + num2;
-                    console.log("+ result: ",sum);
-                    break;
-                case '-': sum += num - num2;
-                    console.log("- result: ",sum);
-                    break;
-                case '*': sum += num * num2;
-                    console.log("* result: ",sum);
-                    break;
-                case '/': sum += num / num2;
-                    console.log("/ result: ",sum);
-                    break;
-
-                case '^': sum += pow(num,num2);
-                    console.log("/ result: ",sum);
-                    break;
+                if(inputToken.arguments == "binary")
+                    {
+                         console.log("Operator", inputToken.token);
+                         num2 = numStack.pop()
+                         num1 = numStack.pop()
+                         opToken = inputToken.token;
+                         sum = equate(opToken, num1, num2);
+                         console.log("Mresult: ", sum);
+                         numStack.push(sum);
+                    }
+                else if(inputToken.arguments == "unary")
+                    {
+                        num1 = numStack.pop()
+                         opToken = inputToken.token;
+                         sum = equate(opToken, num1);
+                         console.log("operation: ",opToken," result: ", sum);
+                         numStack.push(sum);
+                    }
+                else
+                    {
+                        console.log("sign:", inputToken);
+                        num = numStack.pop()
+                        numStack.push(-num);
+                        
+                            
+                    }
+            }
+        else
+            {
+                console.log("Mikael", inputToken);
+                numStack.push(inputToken);
             }
     }
-    else {
-        num = numberStack.pop();
-        // Unary Operators
-        switch(op)
-            {
-                case 'sin': sum += Math.sin(num*Math.PI/180.0);
-                    console.log("+ result: ",sum);
-                    break;
-                case 'cos': sum += Math.cos(num);
-                    console.log("+ result: ",sum);
-                    break;
-                case 'tan': sum += Math.tan(num);
-                    console.log("+ result: ",sum);
-                    break;
 
-                case 'arcsin': sum += Math.asin(num);
-                    console.log("+ result: ",sum);
-                    break;
-                case 'arccos': sum += Math.acos(num);
-                    console.log("+ result: ",sum);
-                    break;
-                case 'arctan': sum += Math.atan(num);
-                    console.log("+ result: ",sum);
-                    break;
-
-                case 'abs': sum += Math.abs(num);
-                    console.log("+ result: ",sum);
-                    break;
-                case 'sqrt': sum += Math.sqrt(num);
-                    console.log("+ result: ",sum);
-                    break;
-                case 'log': sum += Math.log(num);
-                    console.log("+ result: ",sum);
-                    break;
-            }
-    }
-    console.log("Sum number " + counter + " is " + sum);
-    numberStack.push(sum);
-    counter += 1;
-}
-console.log("The result is ", numberStack.pop());
+console.log("The result is ", numStack.pop());
