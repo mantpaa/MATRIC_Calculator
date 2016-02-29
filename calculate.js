@@ -43,7 +43,7 @@ function test2() {
 function test3()
 {
     tokenStack = new Array();
-    console.log("Test2: -2*3");
+    console.log("Test3: -2*3");
     console.log("postfix: 2 3 * -");
     tokenStack.push(2);
     tokenStack.push(3);
@@ -51,6 +51,16 @@ function test3()
     tokenStack.push(new operatorToken("-", "sign"));
 }
 
+function test4()
+{
+    tokenStack = new Array();
+    console.log("Test3: -2*3");
+    console.log("postfix: 2 3 * -");
+    tokenStack.push(2);
+    tokenStack.push(3);
+    tokenStack.push(new operatorToken("*", "binary"));
+    tokenStack.push(new operatorToken("-", "sign"));
+}
 // store equate logic as a seperate function
 function equate(token, num1, num2)
 {
@@ -165,7 +175,7 @@ round(x)	Rounds x to the nearest integer
 */
 
 // calculation loop
-test3();
+test1();
 sum = 0;
 numStack = new Array();
 for(var i = 0; i < tokenStack.length; i++)
